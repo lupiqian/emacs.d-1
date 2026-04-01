@@ -1,6 +1,10 @@
-;;----------------------------------------------------------------------------
+;;; init-gui-frames.el --- Behaviour specific to non-TTY frames -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
+
+
 ;; Stop C-z from minimizing windows under OS X
-;;----------------------------------------------------------------------------
+
 (defun sanityinc/maybe-suspend-frame ()
   (interactive)
   (unless (and *is-a-mac* window-system)
@@ -9,24 +13,27 @@
 (global-set-key (kbd "C-z") 'sanityinc/maybe-suspend-frame)
 
 
-;;----------------------------------------------------------------------------
+
 ;; Suppress GUI features
-;;----------------------------------------------------------------------------
+
 (setq use-file-dialog nil)
 (setq use-dialog-box nil)
 (setq inhibit-startup-screen t)
-(setq inhibit-startup-echo-area-message t)
 
 
-;;----------------------------------------------------------------------------
+
 ;; Window size and features
-;;----------------------------------------------------------------------------
+
+(setq-default
+ window-resize-pixelwise t
+ frame-resize-pixelwise t)
+
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
 (when (fboundp 'set-scroll-bar-mode)
   (set-scroll-bar-mode nil))
-(when (fboundp 'menu-bar-mode)
-  (menu-bar-mode -1))
+
+(menu-bar-mode -1)
 
 (let ((no-border '(internal-border-width . 0)))
   (add-to-list 'default-frame-alist no-border)
@@ -52,7 +59,12 @@
 ;; TODO: use seethru package instead?
 (global-set-key (kbd "M-C-8") (lambda () (interactive) (sanityinc/adjust-opacity nil -2)))
 (global-set-key (kbd "M-C-9") (lambda () (interactive) (sanityinc/adjust-opacity nil 2)))
-(global-set-key (kbd "M-C-0") (lambda () (interactive) (modify-frame-parameters nil `((alpha . 100)))))
+(global-set-key (kbd "M-C-7") (lambda () (interactive) (modify-frame-parameters nil `((alpha . 100)))))
+
+
+(when *is-a-mac*
+  (require-package 'ns-auto-titlebar)
+  (ns-auto-titlebar-mode))
 
 
 (setq frame-title-format
@@ -67,7 +79,19 @@
             (setq line-spacing 0)))
 
 
+;; Change global font size easily
+
+(require-package 'default-text-scale)
+(add-hook 'after-init-hook 'default-text-scale-mode)
+
+
+
 (require-package 'disable-mouse)
+
+
+(when (fboundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-precision-mode))
 
 
 (provide 'init-gui-frames)
+;;; init-gui-frames.el ends here
